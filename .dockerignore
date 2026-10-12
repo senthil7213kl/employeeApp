@@ -1,0 +1,13 @@
+target/
+.git
+.gitignore
+.idea/
+*.iml
+*.ipr
+*.iws
+*.log
+*.md
+Dockerfile
+.dockerignore
+.vscode/
+node_modules/
