@@ -12,9 +12,6 @@ A Spring Boot REST API for managing employees and departments, built with Spring
 - [API Endpoints](#api-endpoints)
 - [Swagger UI](#swagger-ui)
 - [H2 Console](#h2-console)
-- [Docker](#docker)
-- [Docker Compose](#docker-compose)
-- [Kubernetes Deployment](#kubernetes-deployment)
 - [API Examples](#api-examples)
 
 ## ✨ Features
@@ -27,9 +24,6 @@ A Spring Boot REST API for managing employees and departments, built with Spring
 - **Filter by Department**: Get all employees in a specific department
 - **Swagger UI**: Interactive API documentation
 - **H2 Console**: In-memory database browser
-- **Docker Support**: Multi-stage Docker build for easy deployment
-- **Docker Compose**: Local development with MySQL database
-- **Kubernetes Deployment**: Production-ready Kubernetes manifests with HPA, Ingress, and auto-scaling
 - **Global Exception Handling**: Consistent error responses
 
 ## 🛠 Tech Stack
@@ -41,16 +35,11 @@ A Spring Boot REST API for managing employees and departments, built with Spring
 - **Lombok** (boilerplate reduction)
 - **SpringDoc OpenAPI 3** (Swagger UI)
 - **Maven**
-- **Docker & Docker Compose**
-- **Kubernetes**
 
 ## 📦 Prerequisites
 
 - Java 17 or higher
 - Maven 3.6+
-- Docker (optional, for containerized deployment)
-- Docker Compose (optional, for local development with MySQL)
-- Kubernetes cluster (optional, for production deployment)
 
 ## 📁 Project Structure
 
@@ -78,20 +67,6 @@ employeeapp/
 │   ├── application.properties
 │   ├── application-prod.properties
 │   └── sql/
-├── kubernetes/
-│   ├── namespace.yaml
-│   ├── secret.yaml
-│   ├── configmap.yaml
-│   ├── mysql-pvc.yaml
-│   ├── mysql-deployment.yaml
-│   ├── mysql-service.yaml
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   ├── ingress.yaml
-│   ├── hpa.yaml
-│   └── README.md
-├── Dockerfile
-├── docker-compose.yml
 ├── pom.xml
 └── README.md
 ```
@@ -173,121 +148,6 @@ http://localhost:8080/h2-console
 - **JDBC URL**: `jdbc:h2:mem:employeedb`
 - **Username**: `sa`
 - **Password**: (leave blank)
-
-## 🐳 Docker
-
-### Build the Docker Image
-
-```bash
-docker build -t employeeapp:latest .
-```
-
-### Run the Container (with H2 in-memory database)
-
-```bash
-docker run -d -p 8080:8080 --name employee-app employeeapp:latest
-```
-
-### Access the Application
-
-- **API**: `http://localhost:8080/api`
-- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
-- **H2 Console**: `http://localhost:8080/h2-console`
-
-### Stop the Container
-
-```bash
-docker stop employee-app
-docker rm employee-app
-```
-
-## 🐙 Docker Compose
-
-Docker Compose provides a complete local development environment with MySQL database and phpMyAdmin.
-
-### Start the Environment
-
-```bash
-docker-compose up -d
-```
-
-This starts three services:
-- **employeeapp**: The Spring Boot application (port 8080)
-- **mysql**: MySQL 8.0 database (port 3306)
-- **phpmyadmin**: Database management UI (port 8081)
-
-### Access the Services
-
-- **API**: `http://localhost:8080/api`
-- **Swagger UI**: `http://localhost:8080/swagger-ui.html`
-- **phpMyAdmin**: `http://localhost:8081`
-
-### View Logs
-
-```bash
-docker-compose logs -f
-```
-
-### Stop the Environment
-
-```bash
-docker-compose down
-```
-
-### Stop and Remove Data
-
-```bash
-docker-compose down -v
-```
-
-## ☸️ Kubernetes Deployment
-
-The application includes production-ready Kubernetes manifests for deploying to any Kubernetes cluster.
-
-### Quick Start
-
-```bash
-# Build the Docker image
-docker build -t employeeapp:latest .
-
-# Deploy all resources
-kubectl apply -f kubernetes/
-
-# Verify deployment
-kubectl get pods -n employeeapp
-```
-
-### Access the Application
-
-```bash
-# Port forward for local access
-kubectl port-forward svc/employeeapp 8080:80 -n employeeapp
-
-# Access the API
-curl http://localhost:8080/api/employees
-```
-
-### What's Included
-
-- **Namespace**: Isolated `employeeapp` namespace
-- **MySQL Database**: Persistent storage with PVC
-- **Application Deployment**: 3 replicas with rolling updates
-- **Services**: ClusterIP services for internal communication
-- **Ingress**: NGINX Ingress with TLS support
-- **HPA**: Auto-scaling from 2 to 10 replicas based on CPU/memory
-- **Health Probes**: Liveness, readiness, and startup probes
-- **Resource Limits**: CPU and memory requests/limits
-
-### Production Features
-
-- Rolling update strategy (zero downtime deployments)
-- Horizontal Pod Autoscaler (CPU: 70%, Memory: 80%)
-- Health checks with Spring Boot Actuator
-- Persistent MySQL storage
-- TLS/SSL via Ingress
-- ConfigMap and Secret management
-
-For detailed deployment instructions, see [kubernetes/README.md](kubernetes/README.md).
 
 ## 📝 API Examples
 
