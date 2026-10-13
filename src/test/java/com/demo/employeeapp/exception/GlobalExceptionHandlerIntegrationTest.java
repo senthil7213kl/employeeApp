@@ -1,6 +1,7 @@
 package com.demo.employeeapp.exception;
 
-import com.demo.employeeapp.dto.EmployeeDTO;
+import com.demo.employeeapp.dto.DepartmentRequestDTO;
+import com.demo.employeeapp.dto.EmployeeRequestDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
 import com.demo.employeeapp.repository.DepartmentRepository;
@@ -81,7 +82,7 @@ class GlobalExceptionHandlerIntegrationTest {
                 .build();
         employeeRepository.save(existing);
 
-        EmployeeDTO duplicate = EmployeeDTO.builder()
+        EmployeeRequestDTO duplicate = EmployeeRequestDTO.builder()
                 .firstName("Jane")
                 .lastName("Smith")
                 .email("john.doe@example.com")
@@ -101,7 +102,7 @@ class GlobalExceptionHandlerIntegrationTest {
     @Test
     @DisplayName("Should return 400 with proper error body for IllegalArgumentException - Duplicate Department Name")
     void shouldHandleIllegalArgumentException_DuplicateDepartmentName() throws Exception {
-        Department duplicate = Department.builder()
+        DepartmentRequestDTO duplicate = DepartmentRequestDTO.builder()
                 .departmentName("Engineering")
                 .build();
 

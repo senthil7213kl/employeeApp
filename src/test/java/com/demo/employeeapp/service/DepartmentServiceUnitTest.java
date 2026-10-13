@@ -1,6 +1,7 @@
 package com.demo.employeeapp.service;
 
-import com.demo.employeeapp.dto.DepartmentDTO;
+import com.demo.employeeapp.dto.DepartmentRequestDTO;
+import com.demo.employeeapp.dto.DepartmentResponseDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.repository.DepartmentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -57,7 +58,7 @@ class DepartmentServiceUnitTest {
 
             when(departmentRepository.findAll()).thenReturn(Arrays.asList(testDepartment, dept2));
 
-            List<Department> result = departmentService.getAllDepartments();
+            List<DepartmentResponseDTO> result = departmentService.getAllDepartments();
 
             assertEquals(2, result.size());
             verify(departmentRepository).findAll();
@@ -68,7 +69,7 @@ class DepartmentServiceUnitTest {
         void shouldReturnEmptyListWhenNoDepartments() {
             when(departmentRepository.findAll()).thenReturn(List.of());
 
-            List<Department> result = departmentService.getAllDepartments();
+            List<DepartmentResponseDTO> result = departmentService.getAllDepartments();
 
             assertTrue(result.isEmpty());
         }
@@ -83,7 +84,7 @@ class DepartmentServiceUnitTest {
         void shouldReturnDepartmentWhenFound() {
             when(departmentRepository.findById(1L)).thenReturn(Optional.of(testDepartment));
 
-            Department result = departmentService.getDepartmentById(1L);
+            DepartmentResponseDTO result = departmentService.getDepartmentById(1L);
 
             assertEquals("Engineering", result.getDepartmentName());
             assertEquals("Building A", result.getDepartmentLocation());
@@ -108,7 +109,7 @@ class DepartmentServiceUnitTest {
             when(departmentRepository.findByDepartmentNameContainingIgnoreCase("Engineering"))
                     .thenReturn(Optional.of(testDepartment));
 
-            Department result = departmentService.getDepartmentByName("Engineering");
+            DepartmentResponseDTO result = departmentService.getDepartmentByName("Engineering");
 
             assertEquals("Engineering", result.getDepartmentName());
         }
@@ -119,7 +120,7 @@ class DepartmentServiceUnitTest {
             when(departmentRepository.findByDepartmentNameContainingIgnoreCase("Human"))
                     .thenReturn(Optional.of(testDepartment));
 
-            Department result = departmentService.getDepartmentByName("Human");
+            DepartmentResponseDTO result = departmentService.getDepartmentByName("Human");
 
             assertEquals("Engineering", result.getDepartmentName());
         }
@@ -142,7 +143,7 @@ class DepartmentServiceUnitTest {
         @Test
         @DisplayName("Should create department successfully")
         void shouldCreateDepartmentSuccessfully() {
-            DepartmentDTO dto = DepartmentDTO.builder()
+            DepartmentRequestDTO dto = DepartmentRequestDTO.builder()
                     .departmentName("HR")
                     .departmentLocation("Building C")
                     .departmentDescription("Human Resources")
@@ -154,7 +155,7 @@ class DepartmentServiceUnitTest {
                 return saved;
             });
 
-            Department result = departmentService.createDepartment(dto);
+            DepartmentResponseDTO result = departmentService.createDepartment(dto);
 
             assertEquals("HR", result.getDepartmentName());
             assertEquals("Building C", result.getDepartmentLocation());
@@ -165,7 +166,7 @@ class DepartmentServiceUnitTest {
         @Test
         @DisplayName("Should throw IllegalArgumentException when department name already exists")
         void shouldThrowWhenDepartmentNameAlreadyExists() {
-            DepartmentDTO dto = DepartmentDTO.builder()
+            DepartmentRequestDTO dto = DepartmentRequestDTO.builder()
                     .departmentName("Engineering")
                     .build();
 
@@ -186,13 +187,13 @@ class DepartmentServiceUnitTest {
             when(departmentRepository.findById(1L)).thenReturn(Optional.of(testDepartment));
             when(departmentRepository.save(any(Department.class))).thenReturn(testDepartment);
 
-            DepartmentDTO dto = DepartmentDTO.builder()
+            DepartmentRequestDTO dto = DepartmentRequestDTO.builder()
                     .departmentName("Updated Engineering")
                     .departmentLocation("Building D")
                     .departmentDescription("Updated Description")
                     .build();
 
-            Department result = departmentService.updateDepartment(1L, dto);
+            DepartmentResponseDTO result = departmentService.updateDepartment(1L, dto);
 
             assertEquals("Updated Engineering", result.getDepartmentName());
             verify(departmentRepository).save(testDepartment);
@@ -203,7 +204,7 @@ class DepartmentServiceUnitTest {
         void shouldThrowWhenDepartmentNotFound() {
             when(departmentRepository.findById(999L)).thenReturn(Optional.empty());
 
-            DepartmentDTO dto = DepartmentDTO.builder()
+            DepartmentRequestDTO dto = DepartmentRequestDTO.builder()
                     .departmentName("Test")
                     .build();
 

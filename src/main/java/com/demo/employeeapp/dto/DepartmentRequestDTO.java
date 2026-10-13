@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DepartmentDTO {
+public class DepartmentRequestDTO {
 
     @NotBlank(message = "Department name is required")
     private String departmentName;

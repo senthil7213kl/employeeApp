@@ -1,6 +1,7 @@
 package com.demo.employeeapp.service;
 
-import com.demo.employeeapp.dto.DepartmentDTO;
+import com.demo.employeeapp.dto.DepartmentRequestDTO;
+import com.demo.employeeapp.dto.DepartmentResponseDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.repository.DepartmentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,21 +18,25 @@ public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
 
-    public List<Department> getAllDepartments() {
-        return departmentRepository.findAll();
+    public List<DepartmentResponseDTO> getAllDepartments() {
+        return departmentRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 
-    public Department getDepartmentById(Long id) {
-        return departmentRepository.findById(id)
+    public DepartmentResponseDTO getDepartmentById(Long id) {
+        Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + id));
+        return toResponseDTO(department);
     }
 
-    public Department getDepartmentByName(String departmentName) {
-        return departmentRepository.findByDepartmentNameContainingIgnoreCase(departmentName)
+    public DepartmentResponseDTO getDepartmentByName(String departmentName) {
+        Department department = departmentRepository.findByDepartmentNameContainingIgnoreCase(departmentName)
                 .orElseThrow(() -> new EntityNotFoundException("Department not found with name: " + departmentName));
+        return toResponseDTO(department);
     }
 
-    public Department createDepartment(DepartmentDTO dto) {
+    public DepartmentResponseDTO createDepartment(DepartmentRequestDTO dto) {
         if (departmentRepository.existsByDepartmentName(dto.getDepartmentName())) {
             throw new IllegalArgumentException("Department with name already exists: " + dto.getDepartmentName());
         }
@@ -40,15 +45,15 @@ public class DepartmentService {
                 .departmentLocation(dto.getDepartmentLocation())
                 .departmentDescription(dto.getDepartmentDescription())
                 .build();
-        return departmentRepository.save(department);
+        return toResponseDTO(departmentRepository.save(department));
     }
 
-    public Department updateDepartment(Long id, DepartmentDTO dto) {
-        Department department = getDepartmentById(id);
+    public DepartmentResponseDTO updateDepartment(Long id, DepartmentRequestDTO dto) {
+        Department department = getDepartmentByIdEntity(id);
         department.setDepartmentName(dto.getDepartmentName());
         department.setDepartmentLocation(dto.getDepartmentLocation());
         department.setDepartmentDescription(dto.getDepartmentDescription());
-        return departmentRepository.save(department);
+        return toResponseDTO(departmentRepository.save(department));
     }
 
     public void deleteDepartment(Long id) {
@@ -56,5 +61,19 @@ public class DepartmentService {
             throw new EntityNotFoundException("Department not found with id: " + id);
         }
         departmentRepository.deleteById(id);
+    }
+
+    private Department getDepartmentByIdEntity(Long id) {
+        return departmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + id));
+    }
+
+    private DepartmentResponseDTO toResponseDTO(Department department) {
+        return DepartmentResponseDTO.builder()
+                .id(department.getId())
+                .departmentName(department.getDepartmentName())
+                .departmentLocation(department.getDepartmentLocation())
+                .departmentDescription(department.getDepartmentDescription())
+                .build();
     }
 }

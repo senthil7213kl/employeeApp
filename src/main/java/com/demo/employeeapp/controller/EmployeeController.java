@@ -1,8 +1,8 @@
 package com.demo.employeeapp.controller;
 
-import com.demo.employeeapp.dto.EmployeeDTO;
+import com.demo.employeeapp.dto.EmployeeRequestDTO;
+import com.demo.employeeapp.dto.EmployeeResponseDTO;
 import com.demo.employeeapp.dto.SearchResponse;
-import com.demo.employeeapp.entity.Employee;
 import com.demo.employeeapp.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,7 +31,7 @@ public class EmployeeController {
     @GetMapping
     @Operation(summary = "Get all employees", description = "Returns a list of all employees")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of employees")
-    public ResponseEntity<List<Employee>> getAllEmployees() {
+    public ResponseEntity<List<EmployeeResponseDTO>> getAllEmployees() {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
@@ -41,7 +41,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved employee"),
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
-    public ResponseEntity<Employee> getEmployeeById(
+    public ResponseEntity<EmployeeResponseDTO> getEmployeeById(
             @Parameter(description = "Employee ID") @PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
@@ -52,7 +52,7 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved employee"),
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
-    public ResponseEntity<Employee> getEmployeeByEmail(
+    public ResponseEntity<EmployeeResponseDTO> getEmployeeByEmail(
             @Parameter(description = "Employee email") @RequestParam String email) {
         return ResponseEntity.ok(employeeService.getEmployeeByEmail(email));
     }
@@ -60,7 +60,7 @@ public class EmployeeController {
     @GetMapping("/department/{departmentId}")
     @Operation(summary = "Get employees by department", description = "Returns all employees in a specific department")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of employees")
-    public ResponseEntity<List<Employee>> getEmployeesByDepartment(
+    public ResponseEntity<List<EmployeeResponseDTO>> getEmployeesByDepartment(
             @Parameter(description = "Department ID") @PathVariable Long departmentId) {
         return ResponseEntity.ok(employeeService.getEmployeesByDepartmentId(departmentId));
     }
@@ -71,10 +71,9 @@ public class EmployeeController {
             @ApiResponse(responseCode = "201", description = "Employee created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input or email already exists")
     })
-    public ResponseEntity<Employee> createEmployee(
-            @Valid @RequestBody EmployeeDTO dto) {
-        Employee created = employeeService.createEmployee(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<EmployeeResponseDTO> createEmployee(
+            @Valid @RequestBody EmployeeRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(employeeService.createEmployee(dto));
     }
 
     @PutMapping("/{id}")
@@ -83,10 +82,10 @@ public class EmployeeController {
             @ApiResponse(responseCode = "200", description = "Employee updated successfully"),
             @ApiResponse(responseCode = "404", description = "Employee not found")
     })
-    public ResponseEntity<Employee> updateEmployee(
+    public ResponseEntity<EmployeeResponseDTO> updateEmployee(
             @Parameter(description = "Employee ID") @PathVariable Long id,
-            @Valid @RequestBody Employee employee) {
-        return ResponseEntity.ok(employeeService.updateEmployee(id, employee));
+            @Valid @RequestBody EmployeeRequestDTO dto) {
+        return ResponseEntity.ok(employeeService.updateEmployee(id, dto));
     }
 
     @DeleteMapping("/{id}")

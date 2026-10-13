@@ -1,7 +1,7 @@
 package com.demo.employeeapp.controller;
 
-import com.demo.employeeapp.dto.DepartmentDTO;
-import com.demo.employeeapp.entity.Department;
+import com.demo.employeeapp.dto.DepartmentRequestDTO;
+import com.demo.employeeapp.dto.DepartmentResponseDTO;
 import com.demo.employeeapp.service.DepartmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,7 +27,7 @@ public class DepartmentController {
     @GetMapping
     @Operation(summary = "Get all departments", description = "Returns a list of all departments")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved list of departments")
-    public ResponseEntity<List<Department>> getAllDepartments() {
+    public ResponseEntity<List<DepartmentResponseDTO>> getAllDepartments() {
         return ResponseEntity.ok(departmentService.getAllDepartments());
     }
 
@@ -37,7 +37,7 @@ public class DepartmentController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved department"),
             @ApiResponse(responseCode = "404", description = "Department not found")
     })
-    public ResponseEntity<Department> getDepartmentById(
+    public ResponseEntity<DepartmentResponseDTO> getDepartmentById(
             @Parameter(description = "Department ID") @PathVariable Long id) {
         return ResponseEntity.ok(departmentService.getDepartmentById(id));
     }
@@ -48,7 +48,7 @@ public class DepartmentController {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved department"),
             @ApiResponse(responseCode = "404", description = "Department not found")
     })
-    public ResponseEntity<Department> getDepartmentByName(
+    public ResponseEntity<DepartmentResponseDTO> getDepartmentByName(
             @Parameter(description = "Department name") @RequestParam String[] departmentName) {
         String name = String.join(" ", departmentName);
         return ResponseEntity.ok(departmentService.getDepartmentByName(name));
@@ -60,10 +60,9 @@ public class DepartmentController {
             @ApiResponse(responseCode = "201", description = "Department created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input or department name already exists")
     })
-    public ResponseEntity<Department> createDepartment(
-            @Valid @RequestBody DepartmentDTO dto) {
-        Department created = departmentService.createDepartment(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<DepartmentResponseDTO> createDepartment(
+            @Valid @RequestBody DepartmentRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(departmentService.createDepartment(dto));
     }
 
     @PutMapping("/{id}")
@@ -72,9 +71,9 @@ public class DepartmentController {
             @ApiResponse(responseCode = "200", description = "Department updated successfully"),
             @ApiResponse(responseCode = "404", description = "Department not found")
     })
-    public ResponseEntity<Department> updateDepartment(
+    public ResponseEntity<DepartmentResponseDTO> updateDepartment(
             @Parameter(description = "Department ID") @PathVariable Long id,
-            @Valid @RequestBody DepartmentDTO dto) {
+            @Valid @RequestBody DepartmentRequestDTO dto) {
         return ResponseEntity.ok(departmentService.updateDepartment(id, dto));
     }
 

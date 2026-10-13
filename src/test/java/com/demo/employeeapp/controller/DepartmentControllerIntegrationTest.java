@@ -1,5 +1,6 @@
 package com.demo.employeeapp.controller;
 
+import com.demo.employeeapp.dto.DepartmentRequestDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.repository.DepartmentRepository;
 import tools.jackson.databind.ObjectMapper;
@@ -163,7 +164,7 @@ class DepartmentControllerIntegrationTest {
         @Test
         @DisplayName("Should create department with 201 Created")
         void shouldCreateDepartment() throws Exception {
-            Department newDept = Department.builder()
+            DepartmentRequestDTO newDept = DepartmentRequestDTO.builder()
                     .departmentName("HR")
                     .departmentLocation("Building C")
                     .departmentDescription("Human Resources")
@@ -180,7 +181,7 @@ class DepartmentControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when department name already exists")
         void shouldReturn400WhenNameExists() throws Exception {
-            Department duplicate = Department.builder()
+            DepartmentRequestDTO duplicate = DepartmentRequestDTO.builder()
                     .departmentName("Engineering")
                     .build();
 
@@ -199,7 +200,7 @@ class DepartmentControllerIntegrationTest {
         @Test
         @DisplayName("Should update department with 200 OK")
         void shouldUpdateDepartment() throws Exception {
-            Department updated = Department.builder()
+            DepartmentRequestDTO updated = DepartmentRequestDTO.builder()
                     .departmentName("Updated Engineering")
                     .departmentLocation("Building D")
                     .departmentDescription("Updated Description")
@@ -216,7 +217,7 @@ class DepartmentControllerIntegrationTest {
         @Test
         @DisplayName("Should return 404 when department not found")
         void shouldReturn404WhenNotFound() throws Exception {
-            Department updated = Department.builder()
+            DepartmentRequestDTO updated = DepartmentRequestDTO.builder()
                     .departmentName("Updated")
                     .build();
 

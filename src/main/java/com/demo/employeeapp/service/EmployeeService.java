@@ -1,6 +1,8 @@
 package com.demo.employeeapp.service;
 
-import com.demo.employeeapp.dto.EmployeeDTO;
+import com.demo.employeeapp.dto.DepartmentResponseDTO;
+import com.demo.employeeapp.dto.EmployeeRequestDTO;
+import com.demo.employeeapp.dto.EmployeeResponseDTO;
 import com.demo.employeeapp.dto.SearchResponse;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
@@ -29,25 +31,31 @@ public class EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final RestTemplate restTemplate;
 
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public List<EmployeeResponseDTO> getAllEmployees() {
+        return employeeRepository.findAll().stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 
-    public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id)
+    public EmployeeResponseDTO getEmployeeById(Long id) {
+        Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found with id: " + id));
+        return toResponseDTO(employee);
     }
 
-    public Employee getEmployeeByEmail(String email) {
-        return employeeRepository.findByEmail(email)
+    public EmployeeResponseDTO getEmployeeByEmail(String email) {
+        Employee employee = employeeRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found with email: " + email));
+        return toResponseDTO(employee);
     }
 
-    public List<Employee> getEmployeesByDepartmentId(Long departmentId) {
-        return employeeRepository.findByDepartmentId(departmentId);
+    public List<EmployeeResponseDTO> getEmployeesByDepartmentId(Long departmentId) {
+        return employeeRepository.findByDepartmentId(departmentId).stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 
-    public Employee createEmployee(EmployeeDTO dto) {
+    public EmployeeResponseDTO createEmployee(EmployeeRequestDTO dto) {
         if (employeeRepository.existsByEmail(dto.getEmail())) {
             throw new IllegalArgumentException("Employee with email already exists: " + dto.getEmail());
         }
@@ -64,23 +72,23 @@ public class EmployeeService {
                 .department(department)
                 .build();
 
-        return employeeRepository.save(employee);
+        return toResponseDTO(employeeRepository.save(employee));
     }
 
-    public Employee updateEmployee(Long id, Employee employeeDetails) {
-        Employee employee = getEmployeeById(id);
-        employee.setFirstName(employeeDetails.getFirstName());
-        employee.setLastName(employeeDetails.getLastName());
-        employee.setEmail(employeeDetails.getEmail());
-        employee.setPhone(employeeDetails.getPhone());
-        employee.setPosition(employeeDetails.getPosition());
-        employee.setSalary(employeeDetails.getSalary());
-        if (employeeDetails.getDepartment() != null) {
-            Department department = departmentRepository.findById(employeeDetails.getDepartment().getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + employeeDetails.getDepartment().getId()));
+    public EmployeeResponseDTO updateEmployee(Long id, EmployeeRequestDTO dto) {
+        Employee employee = getEmployeeByIdEntity(id);
+        employee.setFirstName(dto.getFirstName());
+        employee.setLastName(dto.getLastName());
+        employee.setEmail(dto.getEmail());
+        employee.setPhone(dto.getPhone());
+        employee.setPosition(dto.getPosition());
+        employee.setSalary(dto.getSalary());
+        if (dto.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(dto.getDepartmentId())
+                    .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + dto.getDepartmentId()));
             employee.setDepartment(department);
         }
-        return employeeRepository.save(employee);
+        return toResponseDTO(employeeRepository.save(employee));
     }
 
     public void deleteEmployee(Long id) {
@@ -120,6 +128,35 @@ public class EmployeeService {
                 .externalApiData(externalApiData)
                 .externalApiUrl(externalApiUrl)
                 .externalApiSuccess(externalApiSuccess)
+                .build();
+    }
+
+    private Employee getEmployeeByIdEntity(Long id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found with id: " + id));
+    }
+
+    private EmployeeResponseDTO toResponseDTO(Employee employee) {
+        DepartmentResponseDTO departmentDTO = null;
+        if (employee.getDepartment() != null) {
+            Department department = employee.getDepartment();
+            departmentDTO = DepartmentResponseDTO.builder()
+                    .id(department.getId())
+                    .departmentName(department.getDepartmentName())
+                    .departmentLocation(department.getDepartmentLocation())
+                    .departmentDescription(department.getDepartmentDescription())
+                    .build();
+        }
+
+        return EmployeeResponseDTO.builder()
+                .id(employee.getId())
+                .firstName(employee.getFirstName())
+                .lastName(employee.getLastName())
+                .email(employee.getEmail())
+                .phone(employee.getPhone())
+                .position(employee.getPosition())
+                .salary(employee.getSalary())
+                .department(departmentDTO)
                 .build();
     }
 }

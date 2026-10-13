@@ -1,6 +1,7 @@
 package com.demo.employeeapp.service;
 
-import com.demo.employeeapp.dto.EmployeeDTO;
+import com.demo.employeeapp.dto.EmployeeRequestDTO;
+import com.demo.employeeapp.dto.EmployeeResponseDTO;
 import com.demo.employeeapp.dto.SearchResponse;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
@@ -85,7 +86,7 @@ class EmployeeServiceUnitTest {
 
             when(employeeRepository.findAll()).thenReturn(Arrays.asList(testEmployee, employee2));
 
-            List<Employee> result = employeeService.getAllEmployees();
+            List<EmployeeResponseDTO> result = employeeService.getAllEmployees();
 
             assertEquals(2, result.size());
             verify(employeeRepository).findAll();
@@ -96,7 +97,7 @@ class EmployeeServiceUnitTest {
         void shouldReturnEmptyListWhenNoEmployees() {
             when(employeeRepository.findAll()).thenReturn(List.of());
 
-            List<Employee> result = employeeService.getAllEmployees();
+            List<EmployeeResponseDTO> result = employeeService.getAllEmployees();
 
             assertTrue(result.isEmpty());
         }
@@ -111,7 +112,7 @@ class EmployeeServiceUnitTest {
         void shouldReturnEmployeeWhenFound() {
             when(employeeRepository.findById(1L)).thenReturn(Optional.of(testEmployee));
 
-            Employee result = employeeService.getEmployeeById(1L);
+            EmployeeResponseDTO result = employeeService.getEmployeeById(1L);
 
             assertEquals("John", result.getFirstName());
             assertEquals("john.doe@example.com", result.getEmail());
@@ -135,7 +136,7 @@ class EmployeeServiceUnitTest {
         void shouldReturnEmployeeWhenFoundByEmail() {
             when(employeeRepository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(testEmployee));
 
-            Employee result = employeeService.getEmployeeByEmail("john.doe@example.com");
+            EmployeeResponseDTO result = employeeService.getEmployeeByEmail("john.doe@example.com");
 
             assertEquals("John", result.getFirstName());
         }
@@ -167,7 +168,7 @@ class EmployeeServiceUnitTest {
             when(employeeRepository.findByDepartmentId(1L))
                     .thenReturn(Arrays.asList(testEmployee, employee2));
 
-            List<Employee> result = employeeService.getEmployeesByDepartmentId(1L);
+            List<EmployeeResponseDTO> result = employeeService.getEmployeesByDepartmentId(1L);
 
             assertEquals(2, result.size());
             verify(employeeRepository).findByDepartmentId(1L);
@@ -178,7 +179,7 @@ class EmployeeServiceUnitTest {
         void shouldReturnEmptyListWhenNoEmployeesInDepartment() {
             when(employeeRepository.findByDepartmentId(1L)).thenReturn(List.of());
 
-            List<Employee> result = employeeService.getEmployeesByDepartmentId(1L);
+            List<EmployeeResponseDTO> result = employeeService.getEmployeesByDepartmentId(1L);
 
             assertTrue(result.isEmpty());
         }
@@ -191,7 +192,7 @@ class EmployeeServiceUnitTest {
         @Test
         @DisplayName("Should create employee successfully")
         void shouldCreateEmployeeSuccessfully() {
-            EmployeeDTO dto = EmployeeDTO.builder()
+            EmployeeRequestDTO dto = EmployeeRequestDTO.builder()
                     .firstName("New")
                     .lastName("User")
                     .email("new.user@example.com")
@@ -205,7 +206,7 @@ class EmployeeServiceUnitTest {
                 return saved;
             });
 
-            Employee result = employeeService.createEmployee(dto);
+            EmployeeResponseDTO result = employeeService.createEmployee(dto);
 
             assertEquals("New", result.getFirstName());
             assertEquals("User", result.getLastName());
@@ -216,7 +217,7 @@ class EmployeeServiceUnitTest {
         @Test
         @DisplayName("Should throw IllegalArgumentException when email already exists")
         void shouldThrowWhenEmailAlreadyExists() {
-            EmployeeDTO dto = EmployeeDTO.builder()
+            EmployeeRequestDTO dto = EmployeeRequestDTO.builder()
                     .email("john.doe@example.com")
                     .departmentId(1L)
                     .build();
@@ -230,7 +231,7 @@ class EmployeeServiceUnitTest {
         @Test
         @DisplayName("Should throw EntityNotFoundException when department not found")
         void shouldThrowWhenDepartmentNotFound() {
-            EmployeeDTO dto = EmployeeDTO.builder()
+            EmployeeRequestDTO dto = EmployeeRequestDTO.builder()
                     .email("new.user@example.com")
                     .departmentId(999L)
                     .build();
@@ -251,18 +252,20 @@ class EmployeeServiceUnitTest {
         @DisplayName("Should update employee successfully")
         void shouldUpdateEmployeeSuccessfully() {
             when(employeeRepository.findById(1L)).thenReturn(Optional.of(testEmployee));
+            when(departmentRepository.findById(1L)).thenReturn(Optional.of(testDepartment));
             when(employeeRepository.save(any(Employee.class))).thenReturn(testEmployee);
 
-            Employee updated = Employee.builder()
+            EmployeeRequestDTO dto = EmployeeRequestDTO.builder()
                     .firstName("Updated")
                     .lastName("Name")
                     .email("updated@example.com")
                     .phone("999-999-9999")
                     .position("Senior Engineer")
                     .salary(90000.0)
+                    .departmentId(1L)
                     .build();
 
-            Employee result = employeeService.updateEmployee(1L, updated);
+            EmployeeResponseDTO result = employeeService.updateEmployee(1L, dto);
 
             assertEquals("Updated", result.getFirstName());
             verify(employeeRepository).save(testEmployee);
@@ -280,14 +283,14 @@ class EmployeeServiceUnitTest {
             when(departmentRepository.findById(2L)).thenReturn(Optional.of(newDepartment));
             when(employeeRepository.save(any(Employee.class))).thenReturn(testEmployee);
 
-            Employee updated = Employee.builder()
+            EmployeeRequestDTO dto = EmployeeRequestDTO.builder()
                     .firstName("John")
                     .lastName("Doe")
                     .email("john.doe@example.com")
-                    .department(newDepartment)
+                    .departmentId(2L)
                     .build();
 
-            employeeService.updateEmployee(1L, updated);
+            employeeService.updateEmployee(1L, dto);
 
             verify(departmentRepository).findById(2L);
             verify(employeeRepository).save(testEmployee);
@@ -298,8 +301,14 @@ class EmployeeServiceUnitTest {
         void shouldThrowWhenEmployeeNotFound() {
             when(employeeRepository.findById(999L)).thenReturn(Optional.empty());
 
+            EmployeeRequestDTO dto = EmployeeRequestDTO.builder()
+                    .firstName("Test")
+                    .email("test@example.com")
+                    .departmentId(1L)
+                    .build();
+
             assertThrows(EntityNotFoundException.class, () ->
-                    employeeService.updateEmployee(999L, testEmployee));
+                    employeeService.updateEmployee(999L, dto));
         }
 
         @Test
@@ -308,12 +317,14 @@ class EmployeeServiceUnitTest {
             when(employeeRepository.findById(1L)).thenReturn(Optional.of(testEmployee));
             when(departmentRepository.findById(999L)).thenReturn(Optional.empty());
 
-            Employee updated = Employee.builder()
-                    .department(Department.builder().id(999L).build())
+            EmployeeRequestDTO dto = EmployeeRequestDTO.builder()
+                    .firstName("John")
+                    .email("john.doe@example.com")
+                    .departmentId(999L)
                     .build();
 
             assertThrows(EntityNotFoundException.class, () ->
-                    employeeService.updateEmployee(1L, updated));
+                    employeeService.updateEmployee(1L, dto));
         }
     }
 

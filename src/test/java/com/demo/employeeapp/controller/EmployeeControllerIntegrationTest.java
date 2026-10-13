@@ -1,6 +1,6 @@
 package com.demo.employeeapp.controller;
 
-import com.demo.employeeapp.dto.EmployeeDTO;
+import com.demo.employeeapp.dto.EmployeeRequestDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
 import com.demo.employeeapp.repository.DepartmentRepository;
@@ -172,7 +172,7 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should create employee with 201 Created")
         void shouldCreateEmployee() throws Exception {
-            EmployeeDTO newEmployee = EmployeeDTO.builder()
+            EmployeeRequestDTO newEmployee = EmployeeRequestDTO.builder()
                     .firstName("New")
                     .lastName("User")
                     .email("new.user@example.com")
@@ -194,7 +194,7 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when email already exists")
         void shouldReturn400WhenEmailExists() throws Exception {
-            EmployeeDTO duplicate = EmployeeDTO.builder()
+            EmployeeRequestDTO duplicate = EmployeeRequestDTO.builder()
                     .firstName("Duplicate")
                     .lastName("User")
                     .email("john.doe@example.com")
@@ -211,7 +211,7 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should return 404 when department not found")
         void shouldReturn404WhenDepartmentNotFound() throws Exception {
-            EmployeeDTO newEmployee = EmployeeDTO.builder()
+            EmployeeRequestDTO newEmployee = EmployeeRequestDTO.builder()
                     .firstName("New")
                     .lastName("User")
                     .email("new.user@example.com")
@@ -233,14 +233,14 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should update employee with 200 OK")
         void shouldUpdateEmployee() throws Exception {
-            Employee updated = Employee.builder()
+            EmployeeRequestDTO updated = EmployeeRequestDTO.builder()
                     .firstName("Updated")
                     .lastName("Name")
                     .email("updated@example.com")
                     .phone("999-999-9999")
                     .position("Senior Engineer")
                     .salary(90000.0)
-                    .department(testDepartment)
+                    .departmentId(testDepartment.getId())
                     .build();
 
             mockMvc.perform(put("/api/employees/{id}", testEmployee.getId())
@@ -254,10 +254,11 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should return 404 when employee not found")
         void shouldReturn404WhenNotFound() throws Exception {
-            Employee updated = Employee.builder()
+            EmployeeRequestDTO updated = EmployeeRequestDTO.builder()
                     .firstName("Updated")
+                    .lastName("Name")
                     .email("updated@example.com")
-                    .department(testDepartment)
+                    .departmentId(testDepartment.getId())
                     .build();
 
             mockMvc.perform(put("/api/employees/{id}", 999L)
