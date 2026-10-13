@@ -10,6 +10,9 @@ INSERT INTO departments (id, department_name, department_location, department_de
 (4, 'Finance', 'Building D', 'Finance and Accounting'),
 (5, 'Sales', 'Building E', 'Sales and Business Development');
 
+-- Reset the AUTO_INCREMENT counter for departments to avoid primary key conflicts
+ALTER TABLE departments ALTER COLUMN id RESTART WITH 6;
+
 -- Insert employees
 INSERT INTO employees (id, first_name, last_name, email, phone, position, salary, department_id) VALUES
 -- Engineering department
@@ -32,3 +35,6 @@ INSERT INTO employees (id, first_name, last_name, email, phone, position, salary
 (13, 'Kevin', 'White', 'kevin.white@example.com', '333-444-5555', 'Sales Director', 115000.00, 5),
 (14, 'Laura', 'Harris', 'laura.harris@example.com', '444-555-6666', 'Sales Representative', 68000.00, 5),
 (15, 'Michael', 'Martin', 'michael.martin@example.com', '555-666-7777', 'Account Executive', 82000.00, 5);
+
+-- Reset the AUTO_INCREMENT counter for employees to avoid primary key conflicts
+ALTER TABLE employees ALTER COLUMN id RESTART WITH 16;

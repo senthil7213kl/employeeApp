@@ -34,6 +34,7 @@ public class DepartmentService {
         if (departmentRepository.existsByDepartmentName(department.getDepartmentName())) {
             throw new IllegalArgumentException("Department with name already exists: " + department.getDepartmentName());
         }
+        department.setId(null);
         return departmentRepository.save(department);
     }
 
