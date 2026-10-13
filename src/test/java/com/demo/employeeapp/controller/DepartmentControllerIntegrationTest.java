@@ -105,6 +105,48 @@ class DepartmentControllerIntegrationTest {
         }
 
         @Test
+        @DisplayName("Should return department by partial name with 200 OK")
+        void shouldReturnDepartmentByPartialName() throws Exception {
+            mockMvc.perform(get("/api/departments/search/by-name")
+                    .param("departmentName", "Eng"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.departmentName").value("Engineering"));
+        }
+
+        @Test
+        @DisplayName("Should return department by multi-word name with 200 OK")
+        void shouldReturnDepartmentByMultiWordName() throws Exception {
+            Department multiWordDept = Department.builder()
+                    .departmentName("Human Resources")
+                    .departmentLocation("Building C")
+                    .departmentDescription("Human Resources and Recruitment")
+                    .build();
+            departmentRepository.save(multiWordDept);
+
+            mockMvc.perform(get("/api/departments/search/by-name")
+                    .param("departmentName", "Human Resources"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.departmentName").value("Human Resources"));
+        }
+
+        @Test
+        @DisplayName("Should handle split multi-word name parameters")
+        void shouldHandleSplitMultiWordNameParameters() throws Exception {
+            Department multiWordDept = Department.builder()
+                    .departmentName("Human Resources")
+                    .departmentLocation("Building C")
+                    .departmentDescription("Human Resources and Recruitment")
+                    .build();
+            departmentRepository.save(multiWordDept);
+
+            mockMvc.perform(get("/api/departments/search/by-name")
+                    .param("departmentName", "Human")
+                    .param("departmentName", "Resources"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.departmentName").value("Human Resources"));
+        }
+
+        @Test
         @DisplayName("Should return 404 when department not found by name")
         void shouldReturn404WhenNotFoundByName() throws Exception {
             mockMvc.perform(get("/api/departments/search/by-name")

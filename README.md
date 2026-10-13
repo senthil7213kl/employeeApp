@@ -13,6 +13,8 @@ A Spring Boot REST API for managing employees and departments, built with Spring
 - [Swagger UI](#swagger-ui)
 - [H2 Console](#h2-console)
 - [API Examples](#api-examples)
+- [Data Models](#data-models)
+- [Error Responses](#error-responses)
 
 ## ✨ Features
 
@@ -221,6 +223,73 @@ curl -X PUT http://localhost:8080/api/employees/1 \
 
 ```bash
 curl -X DELETE http://localhost:8080/api/employees/1
+```
+
+## 📊 Data Models
+
+### Employee
+
+| Field             | Type     | Required | Description                        |
+|-------------------|----------|----------|------------------------------------|
+| `id`              | Long     | Auto     | Unique identifier (auto-generated) |
+| `firstName`       | String   | Yes      | Employee's first name (max 50)     |
+| `lastName`        | String   | Yes      | Employee's last name (max 50)      |
+| `email`           | String   | Yes      | Unique email address (max 100)     |
+| `phone`           | String   | No       | Phone number (max 20)              |
+| `position`        | String   | No       | Job title (max 100)                |
+| `salary`          | Double   | No       | Annual salary                      |
+| `department`      | Object   | Yes      | Department reference (by `id`)     |
+
+### Department
+
+| Field                    | Type     | Required | Description                          |
+|--------------------------|----------|----------|--------------------------------------|
+| `id`                     | Long     | Auto     | Unique identifier (auto-generated)   |
+| `departmentName`         | String   | Yes      | Department name (max 100)            |
+| `departmentLocation`     | String   | No       | Physical location (max 200)          |
+| `departmentDescription`  | String   | No       | Description (max 500)                |
+
+## ⚠️ Error Responses
+
+All error responses follow a consistent format handled by the `GlobalExceptionHandler`.
+
+### 404 Not Found
+
+Returned when a requested resource does not exist.
+
+```json
+{
+  "timestamp": "2026-10-12T17:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Employee not found with id: 9999"
+}
+```
+
+### 400 Bad Request
+
+Returned when the request contains invalid data (e.g., duplicate email or department name).
+
+```json
+{
+  "timestamp": "2026-10-12T17:00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Employee with email john.doe@example.com already exists"
+}
+```
+
+### 500 Internal Server Error
+
+Returned when an unexpected server error occurs.
+
+```json
+{
+  "timestamp": "2026-10-12T17:00:00",
+  "status": 500,
+  "error": "Internal Server Error",
+  "message": "Unexpected error message"
+}
 ```
 
 ## 📄 License

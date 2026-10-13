@@ -1,5 +1,6 @@
 package com.demo.employeeapp.service;
 
+import com.demo.employeeapp.dto.DepartmentDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.repository.DepartmentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -104,7 +105,7 @@ class DepartmentServiceUnitTest {
         @Test
         @DisplayName("Should return department when found by name")
         void shouldReturnDepartmentWhenFoundByName() {
-            when(departmentRepository.findByDepartmentName("Engineering"))
+            when(departmentRepository.findByDepartmentNameContainingIgnoreCase("Engineering"))
                     .thenReturn(Optional.of(testDepartment));
 
             Department result = departmentService.getDepartmentByName("Engineering");
@@ -113,9 +114,20 @@ class DepartmentServiceUnitTest {
         }
 
         @Test
+        @DisplayName("Should return department when found by partial name")
+        void shouldReturnDepartmentWhenFoundByPartialName() {
+            when(departmentRepository.findByDepartmentNameContainingIgnoreCase("Human"))
+                    .thenReturn(Optional.of(testDepartment));
+
+            Department result = departmentService.getDepartmentByName("Human");
+
+            assertEquals("Engineering", result.getDepartmentName());
+        }
+
+        @Test
         @DisplayName("Should throw EntityNotFoundException when department not found by name")
         void shouldThrowWhenDepartmentNotFoundByName() {
-            when(departmentRepository.findByDepartmentName("Nonexistent"))
+            when(departmentRepository.findByDepartmentNameContainingIgnoreCase("Nonexistent"))
                     .thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class, () ->
@@ -130,32 +142,37 @@ class DepartmentServiceUnitTest {
         @Test
         @DisplayName("Should create department successfully")
         void shouldCreateDepartmentSuccessfully() {
-            Department newDept = Department.builder()
+            DepartmentDTO dto = DepartmentDTO.builder()
                     .departmentName("HR")
                     .departmentLocation("Building C")
                     .departmentDescription("Human Resources")
                     .build();
 
             when(departmentRepository.existsByDepartmentName("HR")).thenReturn(false);
-            when(departmentRepository.save(any(Department.class))).thenReturn(newDept);
+            when(departmentRepository.save(any(Department.class))).thenAnswer(invocation -> {
+                Department saved = invocation.getArgument(0);
+                return saved;
+            });
 
-            Department result = departmentService.createDepartment(newDept);
+            Department result = departmentService.createDepartment(dto);
 
             assertEquals("HR", result.getDepartmentName());
-            verify(departmentRepository).save(newDept);
+            assertEquals("Building C", result.getDepartmentLocation());
+            assertEquals("Human Resources", result.getDepartmentDescription());
+            verify(departmentRepository).save(any(Department.class));
         }
 
         @Test
         @DisplayName("Should throw IllegalArgumentException when department name already exists")
         void shouldThrowWhenDepartmentNameAlreadyExists() {
-            Department newDept = Department.builder()
+            DepartmentDTO dto = DepartmentDTO.builder()
                     .departmentName("Engineering")
                     .build();
 
             when(departmentRepository.existsByDepartmentName("Engineering")).thenReturn(true);
 
             assertThrows(IllegalArgumentException.class, () ->
-                    departmentService.createDepartment(newDept));
+                    departmentService.createDepartment(dto));
         }
     }
 
@@ -169,13 +186,13 @@ class DepartmentServiceUnitTest {
             when(departmentRepository.findById(1L)).thenReturn(Optional.of(testDepartment));
             when(departmentRepository.save(any(Department.class))).thenReturn(testDepartment);
 
-            Department updated = Department.builder()
+            DepartmentDTO dto = DepartmentDTO.builder()
                     .departmentName("Updated Engineering")
                     .departmentLocation("Building D")
                     .departmentDescription("Updated Description")
                     .build();
 
-            Department result = departmentService.updateDepartment(1L, updated);
+            Department result = departmentService.updateDepartment(1L, dto);
 
             assertEquals("Updated Engineering", result.getDepartmentName());
             verify(departmentRepository).save(testDepartment);
@@ -186,8 +203,12 @@ class DepartmentServiceUnitTest {
         void shouldThrowWhenDepartmentNotFound() {
             when(departmentRepository.findById(999L)).thenReturn(Optional.empty());
 
+            DepartmentDTO dto = DepartmentDTO.builder()
+                    .departmentName("Test")
+                    .build();
+
             assertThrows(EntityNotFoundException.class, () ->
-                    departmentService.updateDepartment(999L, testDepartment));
+                    departmentService.updateDepartment(999L, dto));
         }
     }
 

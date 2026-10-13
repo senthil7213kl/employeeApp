@@ -1,5 +1,6 @@
 package com.demo.employeeapp.controller;
 
+import com.demo.employeeapp.dto.EmployeeDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
 import com.demo.employeeapp.repository.DepartmentRepository;
@@ -171,14 +172,14 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should create employee with 201 Created")
         void shouldCreateEmployee() throws Exception {
-            Employee newEmployee = Employee.builder()
+            EmployeeDTO newEmployee = EmployeeDTO.builder()
                     .firstName("New")
                     .lastName("User")
                     .email("new.user@example.com")
                     .phone("555-555-5555")
                     .position("Developer")
                     .salary(75000.0)
-                    .department(testDepartment)
+                    .departmentId(testDepartment.getId())
                     .build();
 
             mockMvc.perform(post("/api/employees")
@@ -193,11 +194,11 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should return 400 when email already exists")
         void shouldReturn400WhenEmailExists() throws Exception {
-            Employee duplicate = Employee.builder()
+            EmployeeDTO duplicate = EmployeeDTO.builder()
                     .firstName("Duplicate")
                     .lastName("User")
                     .email("john.doe@example.com")
-                    .department(testDepartment)
+                    .departmentId(testDepartment.getId())
                     .build();
 
             mockMvc.perform(post("/api/employees")
@@ -210,12 +211,11 @@ class EmployeeControllerIntegrationTest {
         @Test
         @DisplayName("Should return 404 when department not found")
         void shouldReturn404WhenDepartmentNotFound() throws Exception {
-            Department nonExistentDept = Department.builder().id(999L).build();
-            Employee newEmployee = Employee.builder()
+            EmployeeDTO newEmployee = EmployeeDTO.builder()
                     .firstName("New")
                     .lastName("User")
                     .email("new.user@example.com")
-                    .department(nonExistentDept)
+                    .departmentId(999L)
                     .build();
 
             mockMvc.perform(post("/api/employees")

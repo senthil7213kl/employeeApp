@@ -1,5 +1,6 @@
 package com.demo.employeeapp.service;
 
+import com.demo.employeeapp.dto.EmployeeDTO;
 import com.demo.employeeapp.dto.SearchResponse;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
@@ -190,50 +191,55 @@ class EmployeeServiceUnitTest {
         @Test
         @DisplayName("Should create employee successfully")
         void shouldCreateEmployeeSuccessfully() {
-            Employee newEmployee = Employee.builder()
+            EmployeeDTO dto = EmployeeDTO.builder()
                     .firstName("New")
                     .lastName("User")
                     .email("new.user@example.com")
-                    .department(Department.builder().id(1L).build())
+                    .departmentId(1L)
                     .build();
 
             when(employeeRepository.existsByEmail("new.user@example.com")).thenReturn(false);
             when(departmentRepository.findById(1L)).thenReturn(Optional.of(testDepartment));
-            when(employeeRepository.save(any(Employee.class))).thenReturn(newEmployee);
+            when(employeeRepository.save(any(Employee.class))).thenAnswer(invocation -> {
+                Employee saved = invocation.getArgument(0);
+                return saved;
+            });
 
-            Employee result = employeeService.createEmployee(newEmployee);
+            Employee result = employeeService.createEmployee(dto);
 
             assertEquals("New", result.getFirstName());
-            verify(employeeRepository).save(newEmployee);
+            assertEquals("User", result.getLastName());
+            assertEquals("new.user@example.com", result.getEmail());
+            verify(employeeRepository).save(any(Employee.class));
         }
 
         @Test
         @DisplayName("Should throw IllegalArgumentException when email already exists")
         void shouldThrowWhenEmailAlreadyExists() {
-            Employee newEmployee = Employee.builder()
+            EmployeeDTO dto = EmployeeDTO.builder()
                     .email("john.doe@example.com")
-                    .department(Department.builder().id(1L).build())
+                    .departmentId(1L)
                     .build();
 
             when(employeeRepository.existsByEmail("john.doe@example.com")).thenReturn(true);
 
             assertThrows(IllegalArgumentException.class, () ->
-                    employeeService.createEmployee(newEmployee));
+                    employeeService.createEmployee(dto));
         }
 
         @Test
         @DisplayName("Should throw EntityNotFoundException when department not found")
         void shouldThrowWhenDepartmentNotFound() {
-            Employee newEmployee = Employee.builder()
+            EmployeeDTO dto = EmployeeDTO.builder()
                     .email("new.user@example.com")
-                    .department(Department.builder().id(999L).build())
+                    .departmentId(999L)
                     .build();
 
             when(employeeRepository.existsByEmail("new.user@example.com")).thenReturn(false);
             when(departmentRepository.findById(999L)).thenReturn(Optional.empty());
 
             assertThrows(EntityNotFoundException.class, () ->
-                    employeeService.createEmployee(newEmployee));
+                    employeeService.createEmployee(dto));
         }
     }
 

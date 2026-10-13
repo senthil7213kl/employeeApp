@@ -64,6 +64,40 @@ class DepartmentRepositoryIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should find department by partial name containing")
+    void shouldFindDepartmentByPartialNameContaining() {
+        Optional<Department> found = departmentRepository.findByDepartmentNameContainingIgnoreCase("Eng");
+
+        assertTrue(found.isPresent());
+        assertEquals("Engineering", found.get().getDepartmentName());
+    }
+
+    @Test
+    @DisplayName("Should find department by partial name case insensitive")
+    void shouldFindDepartmentByPartialNameCaseInsensitive() {
+        Optional<Department> found = departmentRepository.findByDepartmentNameContainingIgnoreCase("engineering");
+
+        assertTrue(found.isPresent());
+        assertEquals("Engineering", found.get().getDepartmentName());
+    }
+
+    @Test
+    @DisplayName("Should find multi-word department by partial name")
+    void shouldFindMultiWordDepartmentByPartialName() {
+        Department multiWordDept = Department.builder()
+                .departmentName("Human Resources")
+                .departmentLocation("Building C")
+                .build();
+        entityManager.persist(multiWordDept);
+        entityManager.flush();
+
+        Optional<Department> found = departmentRepository.findByDepartmentNameContainingIgnoreCase("Human");
+
+        assertTrue(found.isPresent());
+        assertEquals("Human Resources", found.get().getDepartmentName());
+    }
+
+    @Test
     @DisplayName("Should check if department name exists")
     void shouldCheckIfDepartmentNameExists() {
         assertTrue(departmentRepository.existsByDepartmentName("Engineering"));

@@ -1,5 +1,6 @@
 package com.demo.employeeapp.exception;
 
+import com.demo.employeeapp.dto.EmployeeDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
 import com.demo.employeeapp.repository.DepartmentRepository;
@@ -80,11 +81,11 @@ class GlobalExceptionHandlerIntegrationTest {
                 .build();
         employeeRepository.save(existing);
 
-        Employee duplicate = Employee.builder()
+        EmployeeDTO duplicate = EmployeeDTO.builder()
                 .firstName("Jane")
                 .lastName("Smith")
                 .email("john.doe@example.com")
-                .department(testDepartment)
+                .departmentId(testDepartment.getId())
                 .build();
 
         mockMvc.perform(post("/api/employees")

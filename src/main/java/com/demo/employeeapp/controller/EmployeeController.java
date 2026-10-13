@@ -1,5 +1,6 @@
 package com.demo.employeeapp.controller;
 
+import com.demo.employeeapp.dto.EmployeeDTO;
 import com.demo.employeeapp.dto.SearchResponse;
 import com.demo.employeeapp.entity.Employee;
 import com.demo.employeeapp.service.EmployeeService;
@@ -71,8 +72,8 @@ public class EmployeeController {
             @ApiResponse(responseCode = "400", description = "Invalid input or email already exists")
     })
     public ResponseEntity<Employee> createEmployee(
-            @Valid @RequestBody Employee employee) {
-        Employee created = employeeService.createEmployee(employee);
+            @Valid @RequestBody EmployeeDTO dto) {
+        Employee created = employeeService.createEmployee(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 

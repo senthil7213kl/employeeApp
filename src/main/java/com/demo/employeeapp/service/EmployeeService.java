@@ -1,5 +1,6 @@
 package com.demo.employeeapp.service;
 
+import com.demo.employeeapp.dto.EmployeeDTO;
 import com.demo.employeeapp.dto.SearchResponse;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.entity.Employee;
@@ -46,13 +47,23 @@ public class EmployeeService {
         return employeeRepository.findByDepartmentId(departmentId);
     }
 
-    public Employee createEmployee(Employee employee) {
-        if (employeeRepository.existsByEmail(employee.getEmail())) {
-            throw new IllegalArgumentException("Employee with email already exists: " + employee.getEmail());
+    public Employee createEmployee(EmployeeDTO dto) {
+        if (employeeRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException("Employee with email already exists: " + dto.getEmail());
         }
-        Department department = departmentRepository.findById(employee.getDepartment().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + employee.getDepartment().getId()));
-        employee.setDepartment(department);
+        Department department = departmentRepository.findById(dto.getDepartmentId())
+                .orElseThrow(() -> new EntityNotFoundException("Department not found with id: " + dto.getDepartmentId()));
+
+        Employee employee = Employee.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .email(dto.getEmail())
+                .phone(dto.getPhone())
+                .position(dto.getPosition())
+                .salary(dto.getSalary())
+                .department(department)
+                .build();
+
         return employeeRepository.save(employee);
     }
 

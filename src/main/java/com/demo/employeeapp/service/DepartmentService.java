@@ -1,5 +1,6 @@
 package com.demo.employeeapp.service;
 
+import com.demo.employeeapp.dto.DepartmentDTO;
 import com.demo.employeeapp.entity.Department;
 import com.demo.employeeapp.repository.DepartmentRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,23 +27,27 @@ public class DepartmentService {
     }
 
     public Department getDepartmentByName(String departmentName) {
-        return departmentRepository.findByDepartmentName(departmentName)
+        return departmentRepository.findByDepartmentNameContainingIgnoreCase(departmentName)
                 .orElseThrow(() -> new EntityNotFoundException("Department not found with name: " + departmentName));
     }
 
-    public Department createDepartment(Department department) {
-        if (departmentRepository.existsByDepartmentName(department.getDepartmentName())) {
-            throw new IllegalArgumentException("Department with name already exists: " + department.getDepartmentName());
+    public Department createDepartment(DepartmentDTO dto) {
+        if (departmentRepository.existsByDepartmentName(dto.getDepartmentName())) {
+            throw new IllegalArgumentException("Department with name already exists: " + dto.getDepartmentName());
         }
-        department.setId(null);
+        Department department = Department.builder()
+                .departmentName(dto.getDepartmentName())
+                .departmentLocation(dto.getDepartmentLocation())
+                .departmentDescription(dto.getDepartmentDescription())
+                .build();
         return departmentRepository.save(department);
     }
 
-    public Department updateDepartment(Long id, Department departmentDetails) {
+    public Department updateDepartment(Long id, DepartmentDTO dto) {
         Department department = getDepartmentById(id);
-        department.setDepartmentName(departmentDetails.getDepartmentName());
-        department.setDepartmentLocation(departmentDetails.getDepartmentLocation());
-        department.setDepartmentDescription(departmentDetails.getDepartmentDescription());
+        department.setDepartmentName(dto.getDepartmentName());
+        department.setDepartmentLocation(dto.getDepartmentLocation());
+        department.setDepartmentDescription(dto.getDepartmentDescription());
         return departmentRepository.save(department);
     }
 
